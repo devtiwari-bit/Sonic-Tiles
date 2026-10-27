@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<!-- Core SEO -->
+<title>Sonic Tiles by Ved Games Production | Free Rhythm Game</title>
+<meta name="description" content="Sonic Tiles: tap the falling tiles in time with original music. Easy, Medium, Fast and God levels, achievements and three themes. Play free in your browser.">
+<meta name="keywords" content="sonic tiles, rhythm game, magic tiles, music game, free browser game">
+<meta name="author" content="Ved Games Production">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://YOUR-DOMAIN.com/">
+
+<!-- Google Search Console: paste the code Google gives you here -->
+<meta name="google-site-verification" content="REPLACE_WITH_YOUR_SEARCH_CONSOLE_CODE">
+
+<!-- Favicons and app icons -->
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#05060f">
+
+<!-- iOS / Android install -->
+<meta name="application-name" content="Sonic Tiles">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sonic Tiles">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+
+<!-- Social sharing -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Sonic Tiles">
+<meta property="og:title" content="Sonic Tiles by Ved Games Production">
+<meta property="og:description" content="Tap the falling tiles in time with the music. Four levels, achievements and three themes.">
+<meta property="og:url" content="https://YOUR-DOMAIN.com/">
+<meta property="og:image" content="https://YOUR-DOMAIN.com/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Sonic Tiles by Ved Games Production">
+<meta name="twitter:description" content="Tap the falling tiles in time with the music.">
+<meta name="twitter:image" content="https://YOUR-DOMAIN.com/og-image.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Sonic Tiles",
+  "author": { "@type": "Organization", "name": "Ved Games Production" },
+  "genre": "Rhythm",
+  "gamePlatform": "Web Browser",
+  "applicationCategory": "Game",
+  "operatingSystem": "Any",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+  :root { --ink:#e9fbff; --glow:#3ff4ff; --hit:#ff3cc7; --miss:#ff4d6d; --gold:#ffd166; --muted:#8a95bd; }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%; background: #05060f; color: var(--ink);
+    font-family: Poppins, system-ui, -apple-system, "Segoe UI", sans-serif;
+    overflow: hidden; touch-action: none;
+    -webkit-user-select: none; user-select: none;
+  }
+  [hidden] { display: none !important; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  .screen {
+    position: fixed; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center; padding: 24px;
+    background: rgba(5, 6, 20, 0.8);
+  }
+  h1 {
+    font-family: Bungee, sans-serif; font-weight: 400; margin: 0;
+    font-size: 40px; line-height: 1.05; color: var(--ink);
+    text-shadow: 0 0 20px var(--glow), 0 0 40px rgba(255,60,199,0.3);
+  }
+  .credit { color: var(--muted); font-size: 13px; margin: 8px 0 0; letter-spacing: 0.04em; }
+
+  /* Splash */
+  #splash { background: #05060f; cursor: pointer; }
+  #splash svg { width: 128px; height: 128px; animation: rise 1s ease-out both; }
+  #splash h1 { margin-top: 24px; font-size: 44px; animation: rise 1s 0.25s ease-out both; }
+  #splash .credit { animation: rise 1s 0.5s ease-out both; }
+  #splash .tap { margin-top: 40px; color: var(--muted); font-size: 13px; letter-spacing: 0.2em; animation: blink 1.6s 1s infinite; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px) scale(0.96); } to { opacity: 1; transform: none; } }
+  @keyframes blink { 50% { opacity: 0.35; } }
+
+  /* Menu */
+  #msg { color: var(--muted); font-size: 15px; line-height: 1.5; max-width: 330px; margin: 16px 0 26px; min-height: 46px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .chip {
+    background: transparent; color: var(--muted); border: 1px solid #27345e; border-radius: 999px;
+    padding: 9px 16px; font: 600 12px Poppins, sans-serif; letter-spacing: 0.06em; cursor: pointer;
+  }
+  .chip[aria-pressed="true"] { color: var(--glow); border-color: var(--glow); box-shadow: 0 0 14px rgba(63,244,255,0.3); }
+  #levels { margin-top: 0; }
+  #theme { margin-top: 12px; }
+  #play {
+    margin-top: 28px; background: var(--glow); color: #05060f; border: 0; border-radius: 999px;
+    padding: 15px 56px; font: 800 17px Poppins, sans-serif; letter-spacing: 0.08em; cursor: pointer;
+    box-shadow: 0 0 26px rgba(63,244,255,0.45);
+  }
+  #footer { display: flex; gap: 10px; margin-top: 22px; }
+  #iosHint { color: var(--muted); font-size: 12px; line-height: 1.5; max-width: 300px; margin: 14px 0 0; }
+  button:focus-visible { outline: 2px solid var(--hit); outline-offset: 3px; }
+
+  /* Achievements sheet */
+  #ach { background: rgba(5, 6, 20, 0.95); justify-content: flex-start; padding-top: calc(28px + env(safe-area-inset-top, 0px)); overflow-y: auto; }
+  #ach h1 { font-size: 30px; margin-bottom: 18px; }
+  .ach-list { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 8px; }
+  .ach-item { text-align: left; border: 1px solid #27345e; border-radius: 12px; padding: 12px 14px; background: rgba(255,255,255,0.03); }
+  .ach-item b { display: block; font-size: 15px; }
+  .ach-item span { font-size: 13px; color: var(--muted); }
+  .ach-item.on { border-color: var(--gold); }
+  .ach-item.on b { color: var(--gold); }
+  .ach-item.off { opacity: 0.45; }
+  #achClose { margin-top: 20px; }
+
+  /* HUD */
+  #hud { position: fixed; top: 0; left: 0; right: 0; text-align: center; padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 0; pointer-events: none; }
+  #score { font-family: Bungee, sans-serif; font-size: 42px; line-height: 1; color: var(--ink); text-shadow: 0 0 14px var(--glow); font-variant-numeric: tabular-nums; }
+  #combo { font-weight: 800; font-size: 13px; color: var(--hit); min-height: 18px; margin-top: 6px; letter-spacing: 0.06em; }
+  #best { font-size: 11px; color: var(--muted); margin-top: 2px; min-height: 14px; letter-spacing: 0.06em; }
+
+  /* Banners: GOOD, PERFECT, MISSED, achievements */
+  #banner {
+    position: fixed; left: 50%; top: 40%; z-index: 5; pointer-events: none; white-space: nowrap;
+    font-family: Bungee, sans-serif; font-size: 54px; opacity: 0; transform: translate(-50%, -50%);
+  }
+  #banner.show { animation: pop 0.7s ease-out forwards; }
+  #banner.perfect { color: var(--hit); text-shadow: 0 0 22px var(--hit), 0 0 6px #fff; }
+  #banner.good { color: var(--glow); text-shadow: 0 0 18px var(--glow); }
+  #banner.miss { color: var(--miss); text-shadow: 0 0 18px var(--miss); }
+  #banner.ach { color: var(--gold); font-size: 26px; text-shadow: 0 0 18px var(--gold); top: 18%; }
+  @keyframes pop {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    18%  { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+    70%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -80%) scale(1); }
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="hud">
+  <div id="score">0</div>
+  <div id="combo"></div>
+  <div id="best"></div>
+</div>
+
+<div id="banner"></div>
+
+<!-- Opening screen -->
+<div id="splash" class="screen">
+  <svg viewBox="0 0 512 512" aria-hidden="true">
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#2a1647"/><stop offset="0.55" stop-color="#0d0b22"/><stop offset="1" stop-color="#05060f"/>
+      </linearGradient>
+      <linearGradient id="ivory" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b9f6ff"/></linearGradient>
+      <linearGradient id="hit" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff7ad9"/><stop offset="1" stop-color="#ff3cc7"/></linearGradient>
+    </defs>
+    <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+    <rect x="82" y="44" width="72" height="112" rx="16" fill="url(#ivory)"/>
+    <rect x="174" y="150" width="72" height="112" rx="16" fill="url(#ivory)" opacity="0.92"/>
+    <rect x="266" y="288" width="72" height="112" rx="16" fill="url(#hit)"/>
+    <rect x="358" y="186" width="72" height="112" rx="16" fill="url(#ivory)" opacity="0.92"/>
+    <rect x="62" y="398" width="388" height="6" rx="3" fill="#3ff4ff"/>
+  </svg>
+  <h1>SONIC TILES</h1>
+  <p class="credit">by Ved Games Production</p>
+  <p class="tap">TAP TO START</p>
+</div>
+
+<!-- Menu (also shows results after a run) -->
+<div id="menu" class="screen" hidden>
+  <h1>SONIC TILES</h1>
+  <p id="msg">Tap the tiles in time with the music. Tap early for more points.</p>
+  <div id="levels" class="row"></div>
+  <button id="theme" class="chip" type="button">THEME: NEON</button>
+  <button id="play" type="button">PLAY</button>
+  <div id="footer">
+    <button id="achBtn" class="chip" type="button">ACHIEVEMENTS</button>
+    <button id="install" class="chip" type="button" hidden>DOWNLOAD APP</button>
+  </div>
+  <p id="iosHint" hidden>On iPhone: tap Share, then Add to Home Screen. On Android: open the browser menu and tap Install app.</p>
+  <p class="credit">Sonic Tiles · Ved Games Production</p>
+</div>
+
+<!-- Achievements -->
+<div id="ach" class="screen" hidden>
+  <h1>ACHIEVEMENTS</h1>
+  <div id="achList" class="ach-list"></div>
+  <button id="achClose" class="chip" type="button">BACK</button>
+</div>
+
+<script>
+(() => {
+  // ---------- Data ----------
+  const SONGS = [
+    { // NEON DRIVE: lanes map to C D E G
+      phrase: [[2,2],[3,2],[2,2],[1,2], [0,2],[0,2],[1,2],[2,2], [3,2],[3,2],[2,2],[1,2], [0,4],[2,2],[0,2]],
+      chords: [{bass:36,pad:[48,52,55]},{bass:33,pad:[45,48,52]},{bass:41,pad:[48,53,57]},{bass:43,pad:[47,50,55]}]
+    },
+    { // NIGHT RUN
+      phrase: [[3,2],[2,2],[1,2],[1,2], [2,2],[0,2],[1,4], [0,2],[1,2],[2,2],[3,2], [3,4],[2,2],[1,2]],
+      chords: [{bass:33,pad:[45,48,52]},{bass:41,pad:[48,53,57]},{bass:36,pad:[48,52,55]},{bass:43,pad:[47,50,55]}]
+    }
+  ];
+  const LEVELS = [
+    { name: 'EASY',   song: 0, bpm: 140, speed: 1.15 },
+    { name: 'MEDIUM', song: 0, bpm: 165, speed: 1.3 },
+    { name: 'FAST',   song: 1, bpm: 190, speed: 1.45 },
+    { name: 'GOD',    song: 1, bpm: 240, speed: 1.9 }
+  ];
+  const THEMES = [
+    { name: 'NEON', bg: 'synth', ink: '#e9fbff', glow: '#3ff4ff', hit: '#ff3cc7', miss: '#ff4d6d', panel: 'rgba(5,6,20,0.55)' },
+    { name: 'JUNGLE', bg: 'jungle', ink: '#f7efc2', glow: '#b8ff5c', hit: '#ff9f1c', miss: '#e63946', panel: 'rgba(4,20,12,0.55)' },
+    { name: 'TEMPLE', bg: 'temple', ink: '#f3e3bf', glow: '#ffc64d', hit: '#2ec4b6', miss: '#e4572e', panel: 'rgba(16,10,20,0.55)' }
+  ];
+  const ACHS = [
+    { id: 'first',    name: 'First Tile',    desc: 'Hit your first tile.',               test: g => g.hits >= 1 },
+    { id: 'combo10',  name: 'On Fire',       desc: 'Reach a combo of 10.',               test: g => g.maxCombo >= 10 },
+    { id: 'combo30',  name: 'Unstoppable',   desc: 'Reach a combo of 30.',               test: g => g.maxCombo >= 30 },
+    { id: 'perfect25',name: 'Precision',     desc: 'Get 25 Perfect hits in one run.',    test: g => g.perfects >= 25 },
+    { id: 'score5k',  name: 'Five Thousand', desc: 'Score 5,000 in one run.',            test: g => g.score >= 5000 },
+    { id: 'hits50',  name: 'Warm Up',       desc: 'Hit 50 tiles in one run.',           test: g => g.hits >= 50 },
+    { id: 'hits150', name: 'Steady Hands',  desc: 'Hit 150 tiles in one run.',          test: g => g.hits >= 150 },
+    { id: 'hits300', name: 'Speed Demon',   desc: 'Hit 300 tiles in one run.',          test: g => g.hits >= 300 },
+    { id: 'hits500', name: 'Godlike',       desc: 'Hit 500 tiles in one run.',          test: g => g.hits >= 500 }
+  ];
+  const LANE_PITCH = [60, 62, 64, 67];
+  const KEYS = { KeyD: 0, KeyF: 1, KeyJ: 2, KeyK: 3, Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3 };
+  const WIN_EARLY = 1.0, WIN_LATE = 0.22, WIN_PERFECT = 0.07;
+  const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+
+  // ---------- State ----------
+  let levelIdx = 1, themeIdx = 0, game = null, ctx = null, master = null, noiseBuf = null;
+  let flashes = [], parts = [], best = 0, unlocked = {}, bannerTimer = 0, lastFrame = performance.now();
+  try { best = Number(localStorage.getItem('piano-tiles-best')) || 0; } catch (e) {}
+  try { unlocked = JSON.parse(localStorage.getItem('piano-tiles-ach')) || {}; } catch (e) {}
+
+  // ---------- DOM ----------
+  const $ = id => document.getElementById(id);
+  const cv = $('c'), g = cv.getContext('2d');
+  const $score = $('score'), $combo = $('combo'), $best = $('best'), $banner = $('banner');
+  const $splash = $('splash'), $menu = $('menu'), $msg = $('msg'), $play = $('play');
+  const $theme = $('theme'), $ach = $('ach'), $achList = $('achList');
+  const $install = $('install'), $iosHint = $('iosHint');
+
+  // ---------- Layout ----------
+  let W = 0, H = 0, dpr = 1, colW = 100, x0 = 0, hitY = 0;
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = innerWidth; H = innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    const gameW = Math.min(W, 480);
+    colW = gameW / 4; x0 = (W - gameW) / 2; hitY = H * 0.8;
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  const STARS = Array.from({ length: 90 }, () => ({
+    x: Math.random(), y: Math.random(), f: 0.5 + Math.random() * 2.5,
+    p: Math.random() * 6.28, a: 0.4 + Math.random() * 0.6, r: Math.random() < 0.15 ? 2 : 1
+  }));
+  const MOTES = Array.from({ length: 32 }, () => ({
+    x: Math.random(), y: Math.random(), p: Math.random() * 6.28, s: 0.6 + Math.random() * 1.6, r: 1 + Math.random() * 1.5
+  }));
+
+  // ---------- Themes ----------
+  let INK, GLOW, HIT, MISS, PANEL, theme = THEMES[0];
+  function applyTheme(t) {
+    theme = t; INK = t.ink; GLOW = t.glow; HIT = t.hit; MISS = t.miss; PANEL = t.panel;
+    const s = document.documentElement.style;
+    s.setProperty('--ink', t.ink); s.setProperty('--glow', t.glow);
+    s.setProperty('--hit', t.hit); s.setProperty('--miss', t.miss);
+  }
+  applyTheme(THEMES[0]);
+
+  // ---------- Audio ----------
+  function newAudio() {
+    if (ctx) ctx.close().catch(() => {});
+    const AC = window.AudioContext || window.webkitAudioContext;
+    ctx = new AC();
+    master = ctx.createGain(); master.gain.value = 0.8; master.connect(ctx.destination);
+    noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    if (ctx.resume) ctx.resume();
+  }
+  function tone(type, freq, when, dur, vol, opts = {}) {
+    const o = ctx.createOscillator(), gn = ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, when);
+    gn.gain.setValueAtTime(0.0001, when);
+    gn.gain.exponentialRampToValueAtTime(vol, when + (opts.attack || 0.005));
+    gn.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+    let node = o;
+    if (opts.lp) { const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = opts.lp; o.connect(f); node = f; }
+    node.connect(gn); gn.connect(master);
+    o.start(when); o.stop(when + dur + 0.05);
+  }
+  function piano(midi, when, vol, dur) {
+    const f = mtof(midi);
+    tone('triangle', f, when, dur, vol, { attack: 0.004 });
+    tone('sine', f * 2, when, dur * 0.5, vol * 0.25, { attack: 0.004 });
+  }
+  function kick(when) {
+    const o = ctx.createOscillator(), gn = ctx.createGain();
+    o.frequency.setValueAtTime(140, when); o.frequency.exponentialRampToValueAtTime(40, when + 0.15);
+    gn.gain.setValueAtTime(0.9, when); gn.gain.exponentialRampToValueAtTime(0.001, when + 0.2);
+    o.connect(gn); gn.connect(master); o.start(when); o.stop(when + 0.22);
+  }
+  function noise(when, dur, vol, type, freq) {
+    const s = ctx.createBufferSource(); s.buffer = noiseBuf;
+    const f = ctx.createBiquadFilter(); f.type = type; f.frequency.value = freq;
+    const gn = ctx.createGain();
+    gn.gain.setValueAtTime(vol, when); gn.gain.exponentialRampToValueAtTime(0.001, when + dur);
+    s.connect(f); f.connect(gn); gn.connect(master); s.start(when); s.stop(when + dur + 0.02);
+  }
+  function scheduleMusic(t0, song, E) {
+    const BAR = 8 * E;
+    for (let b = 0; b < 24; b++) {
+      const c = song.chords[b % 4], s = t0 + b * BAR;
+      tone('sawtooth', mtof(c.bass), s, 4 * E, 0.07, { lp: 380 });
+      tone('sawtooth', mtof(c.bass + 7), s + 4 * E, 4 * E, 0.05, { lp: 380 });
+      c.pad.forEach(m => tone('triangle', mtof(m), s, BAR, 0.028, { attack: 0.12 }));
+      for (let q = 0; q < 4; q++) piano(c.pad[q % 3] + 12, s + q * 2 * E, 0.045, 0.9);
+      for (let k = 0; k < 8; k++) {
+        const w = s + k * E;
+        noise(w, 0.05, k % 2 ? 0.05 : 0.025, 'highpass', 7000);
+        if (k === 0 || k === 4) kick(w);
+        if (k === 2 || k === 6) noise(w, 0.14, 0.18, 'bandpass', 1800);
+      }
+    }
+  }
+
+  // ---------- Menus ----------
+  function chip(container, label, onClick) {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.type = 'button'; b.textContent = label; b.onclick = onClick;
+    container.appendChild(b); return b;
+  }
+  const levelChips = LEVELS.map((L, i) => chip($('levels'), L.name, () => selectLevel(i)));
+  function selectLevel(i) {
+    levelIdx = i;
+    levelChips.forEach((c, j) => c.setAttribute('aria-pressed', j === i ? 'true' : 'false'));
+  }
+  selectLevel(levelIdx);
+
+  $theme.onclick = () => {
+    themeIdx = (themeIdx + 1) % THEMES.length;
+    applyTheme(THEMES[themeIdx]);
+    $theme.textContent = 'THEME: ' + THEMES[themeIdx].name;
+  };
+
+  function showMenu(msg) {
+    $splash.hidden = true;
+    $menu.hidden = false;
+    $msg.textContent = msg || 'Tap the tiles in time with the music. Tap early for more points.';
+    $play.textContent = msg ? 'PLAY AGAIN' : 'PLAY';
+  }
+  let splashDone = false;
+  function leaveSplash() { if (!splashDone) { splashDone = true; showMenu(); } }
+  $splash.addEventListener('click', leaveSplash);
+  setTimeout(leaveSplash, 2600);
+
+  // ---------- Achievements ----------
+  function renderAch() {
+    $achList.innerHTML = '';
+    for (const a of ACHS) {
+      const on = !!unlocked[a.id];
+      const d = document.createElement('div');
+      d.className = 'ach-item ' + (on ? 'on' : 'off');
+      d.innerHTML = '<b>' + (on ? '★ ' : '☆ ') + a.name + '</b><span>' + a.desc + '</span>';
+      $achList.appendChild(d);
+    }
+    const n = ACHS.filter(a => unlocked[a.id]).length;
+    const sub = document.createElement('p');
+    sub.className = 'credit';
+    sub.textContent = n + ' of ' + ACHS.length + ' unlocked';
+    $achList.appendChild(sub);
+  }
+  $('achBtn').onclick = () => { renderAch(); $ach.hidden = false; };
+  $('achClose').onclick = () => { $ach.hidden = true; };
+
+  function checkAch(stats) {
+    let last = null;
+    for (const a of ACHS) {
+      if (!unlocked[a.id] && a.test(stats)) { unlocked[a.id] = true; last = a; }
+    }
+    if (last) {
+      try { localStorage.setItem('piano-tiles-ach', JSON.stringify(unlocked)); } catch (e) {}
+      showBanner('ACHIEVEMENT: ' + last.name, 'ach');
+    }
+  }
+
+  // ---------- Banners ----------
+  function showBanner(text, cls) {
+    $banner.textContent = text;
+    $banner.className = '';
+    void $banner.offsetWidth; // restart the animation
+    $banner.className = 'show ' + cls;
+  }
+
+  // ---------- Game ----------
+  function updateHud() {
+    $score.textContent = game ? game.score.toLocaleString() : '0';
+    $combo.textContent = game && game.combo >= 4 ? game.combo + ' IN A ROW' : '';
+    $best.textContent = best ? 'BEST ' + best.toLocaleString() : '';
+  }
+
+  function start() {
+    const level = LEVELS[levelIdx], song = SONGS[level.song];
+    $menu.hidden = true;
+    newAudio();
+    const E = 60 / level.bpm / 2;
+    const t0 = ctx.currentTime + 0.6;
+    game = {
+      notes: [], t0, beat: 2 * E, song, E, nextT: t0, level: level.name,
+      bpm: level.bpm, baseSpeed: level.speed, speed: level.speed, tier: 0, beats: [], bi: 0,
+      score: 0, combo: 0, maxCombo: 0, hits: 0, perfects: 0, won: false, state: 'playing'
+    };
+    appendChunk(game);
+    flashes = []; parts = [];
+    updateHud();
+  }
+
+  // Every phrase is newly generated: random rhythms (1 to 4 eighth notes), lanes that move step by step or jump, and occasional rests
+  function genPhrase() {
+    const out = [];
+    let prev = Math.floor(Math.random() * 4);
+    for (let bar = 0; bar < 4; bar++) {
+      let left = 8;
+      while (left > 0) {
+        const opts = left >= 4 ? [1, 2, 2, 3, 4] : left >= 3 ? [1, 2, 3] : left >= 2 ? [1, 2] : [1];
+        const len = opts[Math.floor(Math.random() * opts.length)];
+        if (Math.random() < 0.12) {
+          out.push([-1, len]); // rest
+        } else {
+          const r = Math.random();
+          let lane;
+          if (r < 0.6) lane = Math.max(0, Math.min(3, prev + (Math.random() < 0.5 ? -1 : 1)));
+          else if (r < 0.85) lane = prev;
+          else lane = Math.floor(Math.random() * 4);
+          prev = lane;
+          out.push([lane, len]);
+        }
+        left -= len;
+      }
+    }
+    return out;
+  }
+
+  // Endless: adds another 6 loops of the song (with notes and music) before the current ones run out
+  function appendChunk(gm) {
+    const nowT = ctx.currentTime;
+    gm.notes = gm.notes.filter(n => !n.done || n.t > nowT - 3);
+    // Speed step every 5,000 points: tempo and tile fall both go up by 8% per step (capped at 2.2x)
+    const tier = Math.floor(gm.score / 5000);
+    if (tier > gm.tier) { gm.tier = tier; showBanner('SPEED UP', 'good'); }
+    const mult = Math.min(1 + 0.08 * tier, 2.2);
+    gm.E = 60 / (gm.bpm * mult) / 2;
+    gm.speed = gm.baseSpeed * mult;
+    const start = gm.nextT, E = gm.E;
+    let e = 0;
+    for (let L = 0; L < 6; L++) {
+      for (const [lane, len] of genPhrase()) {
+        if (lane >= 0) gm.notes.push({ lane, t: start + e * E, dur: len * E, done: 0 }); // done: 0 pending, 1 hit, 2 missed
+        e += len;
+      }
+    }
+    for (let q = 0; q < 96; q++) gm.beats.push(start + q * 2 * E); // quarter-note times, used for the background pulse
+    scheduleMusic(start, gm.song, E);
+    gm.nextT = start + e * E;
+  }
+
+  function finish(kind, lane) {
+    if (game.state !== 'playing') return;
+    game.state = kind;
+    if (game.score > best) {
+      best = game.score;
+      try { localStorage.setItem('piano-tiles-best', String(best)); } catch (e) {}
+    }
+    updateHud();
+    if (kind === 'fail') {
+      if (lane >= 0 && ctx) flashes.push({ lane, t: ctx.currentTime, kind: 'miss' });
+      ctx.suspend();
+      showBanner('MISSED', 'miss');
+      checkAch(game);
+      const text = 'Missed a tile. Score ' + game.score.toLocaleString() + ', best combo ' + game.maxCombo + '.';
+      setTimeout(() => showMenu(text), 1100);
+    } else {
+      game.won = true;
+      showBanner('COMPLETE', 'perfect');
+      checkAch(game);
+      const text = game.level + ' complete! Score ' + game.score.toLocaleString() + ', best combo ' + game.maxCombo + '.';
+      setTimeout(() => showMenu(text), 1300);
+    }
+  }
+
+  function burst(lane) {
+    const cx = x0 + (lane + 0.5) * colW;
+    for (let i = 0; i < 14; i++) {
+      const a = Math.random() * Math.PI * 2, s = 60 + Math.random() * 180;
+      parts.push({ x: cx, y: hitY, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 90, t: 0, life: 0.45 + Math.random() * 0.3 });
+    }
+  }
+
+  function tap(lane) {
+    if (!game || game.state !== 'playing') return;
+    const now = ctx.currentTime;
+    // Pick the closest target in this lane. An untouched tile wins ties and close calls.
+    // If the closest target is a tile that was already touched and is still under the line, the player is eliminated.
+    let pick = null, bestDt = Infinity, touchedHit = false;
+    for (const n of game.notes) {
+      if (n.lane !== lane) continue;
+      if (n.done === 1) {
+        if (now >= n.t && now <= n.t + n.dur - 0.03) {
+          const since = now - n.t;
+          if (since < bestDt) { bestDt = since; pick = n; touchedHit = true; }
+        }
+        continue;
+      }
+      if (n.done) continue;
+      const d = n.t - now;
+      if (d > WIN_EARLY || d < -WIN_LATE) continue;
+      const dt = Math.abs(d);
+      if (dt <= bestDt) { bestDt = dt; pick = n; touchedHit = false; }
+    }
+    if (touchedHit || !pick) { finish('fail', lane); return; }
+    hitNote(pick, lane, now, bestDt);
+  }
+
+  // Judge a hit on an untouched tile: sound, score, banner, sparks
+  function hitNote(n, lane, now, dt) {
+    n.done = 1;
+    const perfect = dt <= WIN_PERFECT;
+    piano(LANE_PITCH[lane], now, 0.32, Math.max(0.8, n.dur * 2));
+    game.combo++; game.hits++;
+    game.maxCombo = Math.max(game.maxCombo, game.combo);
+    if (perfect) game.perfects++;
+    game.score += (perfect ? 100 : 60) + Math.min(game.combo, 30) * 2;
+    showBanner(perfect ? 'PERFECT' : 'GOOD', perfect ? 'perfect' : 'good');
+    flashes.push({ lane, t: now, kind: 'ok' });
+    burst(lane);
+    updateHud();
+    checkAch(game);
+  }
+
+  // Touch/click: each tile has its own hit box, so the tile above and the tile below never overlap.
+  // Touching an untouched tile (above or below the line) is a hit. Pressing directly on a tile that was already touched eliminates you.
+  // Touching empty space or missing slightly does nothing.
+  function tapAt(lane, y) {
+    if (!game || game.state !== 'playing') return;
+    const now = ctx.currentTime, pps = H * 0.5 * game.speed;
+    let pending = null, pendingDist = Infinity;
+    for (const n of game.notes) {
+      if (n.lane !== lane) continue;
+      const yB = hitY - (n.t - now) * pps;
+      const h = Math.max(n.dur * pps - 6, 28);
+      const yT = yB - h;
+      if (n.done) {
+        // Pressing directly on a tile that was already touched eliminates the player
+        if (n.done === 1 && y >= yT && y <= yB) { finish('fail', lane); return; }
+        continue;
+      }
+      // Untouched tiles get a generous touch zone, so near taps still register
+      const dist = Math.abs(y - (yT + yB) / 2);
+      if (dist <= Math.max(h / 2, 26) && dist < pendingDist) { pendingDist = dist; pending = n; }
+    }
+    if (!pending) return; // touched empty space: nothing happens
+    const d = pending.t - now;
+    if (d > WIN_EARLY || d < -WIN_LATE) return; // outside the timing window: nothing happens
+    hitNote(pending, lane, now, Math.abs(d));
+  }
+
+  function update(now) {
+    if (!game || game.state !== 'playing') return;
+    for (const n of game.notes) {
+      if (!n.done && now > n.t + WIN_LATE) { n.done = 2; finish('fail', n.lane); return; }
+    }
+    if (game.nextT - now < 12) appendChunk(game);
+  }
+
+  // ---------- Backgrounds ----------
+  function drawSynthwave(tt, pulse) {
+    const hz = H * 0.36;
+    const sky = g.createLinearGradient(0, 0, 0, hz);
+    sky.addColorStop(0, '#050614'); sky.addColorStop(1, '#2b0c44');
+    g.fillStyle = sky; g.fillRect(0, 0, W, hz);
+    g.fillStyle = '#080617'; g.fillRect(0, hz, W, H - hz);
+    for (const s of STARS) {
+      const a = (0.35 + 0.65 * (0.5 + 0.5 * Math.sin(tt * s.f + s.p))) * s.a;
+      g.fillStyle = 'rgba(200,240,255,' + a.toFixed(3) + ')';
+      g.fillRect(s.x * W, s.y * hz, s.r, s.r);
+    }
+    const R = Math.min(W, 480) * 0.4 * (1 + 0.04 * pulse);
+    const sx = W / 2, sy = hz - R * 0.2;
+    const sg = g.createLinearGradient(0, sy - R, 0, sy + R);
+    sg.addColorStop(0, '#ffd23f'); sg.addColorStop(0.5, '#ff3cc7'); sg.addColorStop(1, '#6a1fff');
+    g.save(); g.beginPath(); g.arc(sx, sy, R, 0, Math.PI * 2); g.clip();
+    g.fillStyle = sg; g.fillRect(sx - R, sy - R, R * 2, R * 2);
+    g.fillStyle = '#080617';
+    for (let i = 0; i < 6; i++) g.fillRect(sx - R, sy + R * (0.05 + i * 0.16), R * 2, 2 + i * 1.6);
+    g.restore();
+    g.shadowColor = GLOW; g.shadowBlur = 16; g.fillStyle = GLOW; g.fillRect(0, hz - 1, W, 2); g.shadowBlur = 0;
+    const off = ((tt * 0.6) % 1 + 1) % 1;
+    for (let i = 0; i < 14; i++) {
+      const z = (i + off) / 14, y = hz + (H - hz) * z * z;
+      g.strokeStyle = 'rgba(255,60,199,' + (0.08 + 0.35 * z).toFixed(3) + ')';
+      g.lineWidth = 1; g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
+    }
+    g.strokeStyle = 'rgba(63,244,255,0.16)';
+    g.beginPath();
+    for (let j = -10; j <= 10; j++) { g.moveTo(W / 2, hz); g.lineTo(W / 2 + j * W * 0.12, H); }
+    g.stroke();
+  }
+
+  function drawMotes(tt, pulse, color) {
+    g.fillStyle = color;
+    for (const m of MOTES) {
+      const x = (((m.x + Math.sin(tt * 0.2 * m.s + m.p) * 0.04) % 1) + 1) % 1 * W;
+      const y = m.y * H * 0.9;
+      g.globalAlpha = (0.25 + 0.75 * (0.5 + 0.5 * Math.sin(tt * m.s * 2 + m.p))) * (0.6 + 0.4 * pulse);
+      g.beginPath(); g.arc(x, y, m.r, 0, Math.PI * 2); g.fill();
+    }
+    g.globalAlpha = 1;
+  }
+
+  function drawJungle(tt, pulse) {
+    const hz = H * 0.36;
+    const sky = g.createLinearGradient(0, 0, 0, hz);
+    sky.addColorStop(0, '#04110a'); sky.addColorStop(1, '#1f5c38');
+    g.fillStyle = sky; g.fillRect(0, 0, W, hz);
+    const sx = W * 0.5, sy = hz * 0.3, R = Math.min(W, 480) * (0.5 + 0.05 * pulse);
+    const rg = g.createRadialGradient(sx, sy, 0, sx, sy, R);
+    rg.addColorStop(0, 'rgba(255,236,160,' + (0.5 + 0.2 * pulse).toFixed(3) + ')');
+    rg.addColorStop(1, 'rgba(255,236,160,0)');
+    g.fillStyle = rg; g.fillRect(0, 0, W, hz * 1.2);
+    for (let i = 0; i < 5; i++) {
+      const x = W * (0.12 + i * 0.19) + Math.sin(tt * 0.3 + i) * 18;
+      g.fillStyle = 'rgba(255,244,190,' + (0.04 + 0.06 * pulse).toFixed(3) + ')';
+      g.beginPath(); g.moveTo(x, 0); g.lineTo(x + 50, 0); g.lineTo(x + 190, H); g.lineTo(x + 110, H); g.closePath(); g.fill();
+    }
+    g.fillStyle = '#071a10'; g.fillRect(0, hz, W, H - hz);
+    const mist = g.createLinearGradient(0, hz, 0, hz + H * 0.15);
+    mist.addColorStop(0, 'rgba(180,230,190,0.18)'); mist.addColorStop(1, 'rgba(180,230,190,0)');
+    g.fillStyle = mist; g.fillRect(0, hz, W, H * 0.15);
+    const rows = [
+      { n: 11, base: hz, hmin: 0.35, hvar: 0.35, col: '#124428', sway: 0.5 },
+      { n: 7, base: hz + 4, hmin: 0.55, hvar: 0.4, col: '#0b2a1a', sway: 1 }
+    ];
+    for (const r of rows) {
+      g.fillStyle = r.col;
+      for (let i = 0; i < r.n; i++) {
+        const x = (i + 0.5) * W / r.n;
+        const hgt = hz * (r.hmin + r.hvar * (((i * 37) % 10) / 10));
+        const sway = Math.sin(tt * 0.8 * r.sway + i) * 10 * r.sway;
+        g.fillRect(x - 4, r.base - hgt, 8, hgt);
+        g.beginPath(); g.ellipse(x + sway, r.base - hgt, W / r.n * 0.85, hgt * 0.32, 0, 0, Math.PI * 2); g.fill();
+      }
+    }
+    drawMotes(tt, pulse, '#d7ff6b');
+  }
+
+  function drawTemple(tt, pulse) {
+    const hz = H * 0.36;
+    const sky = g.createLinearGradient(0, 0, 0, hz);
+    sky.addColorStop(0, '#0c0917'); sky.addColorStop(1, '#5a2a3e');
+    g.fillStyle = sky; g.fillRect(0, 0, W, hz);
+    const mr = Math.min(W, 480) * 0.06;
+    g.shadowColor = '#fff1c9'; g.shadowBlur = 30; g.fillStyle = '#fff1c9';
+    g.beginPath(); g.arc(W * 0.78, hz * 0.3, mr, 0, Math.PI * 2); g.fill(); g.shadowBlur = 0;
+    g.fillStyle = '#17121f'; g.fillRect(0, hz, W, H - hz);
+    const stepH = H * 0.04;
+    for (let i = 0; i < 5; i++) {
+      const w = W * 0.56 * (1 - i * 0.17);
+      g.fillStyle = i % 2 ? '#2e2538' : '#3a2f46';
+      g.fillRect(W / 2 - w / 2, hz - (i + 1) * stepH, w, stepH + 1);
+    }
+    g.fillStyle = '#ffc64d'; g.fillRect(W / 2 - 14, hz - 5 * stepH - 10, 28, 10);
+    for (const cx of [W * 0.1, W * 0.22, W * 0.78, W * 0.9]) {
+      const top = hz - H * 0.22;
+      g.fillStyle = '#3a3045'; g.fillRect(cx - 14, top + 14, 28, hz - top - 14);
+      g.fillStyle = '#4a3e58'; g.fillRect(cx - 22, top, 44, 14); g.fillRect(cx - 22, hz - 8, 44, 8);
+      const fr = 26 * (1 + 0.18 * Math.sin(tt * 11 + cx) + 0.12 * pulse);
+      const tg = g.createRadialGradient(cx, top - 6, 0, cx, top - 6, fr);
+      tg.addColorStop(0, 'rgba(255,200,90,0.9)'); tg.addColorStop(1, 'rgba(255,120,40,0)');
+      g.fillStyle = tg; g.beginPath(); g.arc(cx, top - 6, fr, 0, Math.PI * 2); g.fill();
+    }
+    drawMotes(tt, pulse, '#ffd27a');
+  }
+
+  function drawBackground(tt, pulse) {
+    if (theme.bg === 'jungle') drawJungle(tt, pulse);
+    else if (theme.bg === 'temple') drawTemple(tt, pulse);
+    else drawSynthwave(tt, pulse);
+  }
+
+  // ---------- Drawing ----------
+  function rr(x, y, w, h, r) {
+    g.beginPath();
+    g.moveTo(x + r, y);
+    g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r);
+    g.closePath();
+  }
+
+  function draw(now, dt) {
+    const tt = game ? now : performance.now() / 1000;
+    let pulse = 0;
+    if (game) {
+      while (game.bi + 1 < game.beats.length && game.beats[game.bi + 1] <= now) game.bi++;
+      const since = now - game.beats[game.bi];
+      pulse = since >= 0 ? Math.pow(Math.max(0, 1 - since / 0.35), 3) : 0;
+    }
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drawBackground(tt, pulse);
+
+    g.fillStyle = PANEL; g.fillRect(x0, 0, colW * 4, H);
+    g.fillStyle = 'rgba(63,244,255,0.12)';
+    for (let i = 1; i < 4; i++) g.fillRect(x0 + i * colW - 0.5, 0, 1, H);
+
+    flashes = flashes.filter(f => now - f.t < 0.35);
+    for (const f of flashes) {
+      const a = 1 - (now - f.t) / 0.35;
+      g.fillStyle = f.kind === 'ok' ? 'rgba(63,244,255,' + (a * 0.18).toFixed(3) + ')' : 'rgba(255,77,109,' + (a * 0.4).toFixed(3) + ')';
+      g.fillRect(x0 + f.lane * colW, 0, colW, H);
+    }
+
+    if (game) {
+      const pps = H * 0.5 * game.speed;
+      for (const n of game.notes) {
+        const yB = hitY - (n.t - now) * pps;
+        const h = Math.max(n.dur * pps - 6, 28);
+        const yT = yB - h;
+        if (yT > H || yB < -10) continue;
+        const d = n.t - now;
+        const tappable = !n.done && d <= WIN_EARLY && d >= -WIN_LATE;
+        if (n.done === 1) { g.fillStyle = HIT; g.shadowColor = HIT; g.shadowBlur = 18; }
+        else if (n.done === 2) { g.fillStyle = MISS; g.shadowColor = MISS; g.shadowBlur = 18; }
+        else { g.fillStyle = INK; g.shadowColor = GLOW; g.shadowBlur = tappable ? 26 : 10; }
+        rr(x0 + n.lane * colW + 6, yT, colW - 12, h, 8);
+        g.fill();
+      }
+      g.shadowBlur = 0;
+
+      g.fillStyle = GLOW; g.shadowColor = GLOW; g.shadowBlur = 18;
+      g.fillRect(x0, hitY - 1.5, colW * 4, 3);
+      g.shadowBlur = 0;
+
+      parts = parts.filter(p => p.t < p.life);
+      for (const p of parts) {
+        p.t += dt;
+        p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 420 * dt;
+        g.globalAlpha = Math.max(0, 1 - p.t / p.life);
+        g.fillStyle = HIT; g.fillRect(p.x, p.y, 3, 3);
+      }
+      g.globalAlpha = 1;
+
+      const frac = ((now - game.t0) * 0.08) % 1;
+      g.fillStyle = GLOW; g.shadowColor = GLOW; g.shadowBlur = 10;
+      g.fillRect(0, H - 3, W * frac, 3);
+      g.shadowBlur = 0;
+    }
+  }
+
+  function loop(ts) {
+    const dt = Math.min(0.05, (ts - lastFrame) / 1000);
+    lastFrame = ts;
+    const now = ctx ? ctx.currentTime : 0;
+    update(now);
+    draw(now, dt);
+    requestAnimationFrame(loop);
+  }
+
+  // ---------- Input ----------
+  cv.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    const lane = Math.floor((e.clientX - x0) / colW);
+    if (lane >= 0 && lane < 4) tapAt(lane, e.clientY);
+  });
+  addEventListener('keydown', e => {
+    if (e.repeat) return;
+    if (!$splash.hidden) { leaveSplash(); return; }
+    if (!$menu.hidden) {
+      if (e.code === 'Enter' || e.code === 'Space') { e.preventDefault(); $play.click(); }
+      return;
+    }
+    if ($ach.hidden === false) return;
+    const lane = KEYS[e.code];
+    if (lane !== undefined) tap(lane);
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && game && game.state === 'playing') finish('fail', -1);
+  });
+  $play.onclick = start;
+
+  // ---------- Install / download app ----------
+  let deferredPrompt = null;
+  const isStandalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (!isStandalone) $install.hidden = false;
+  });
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isIOS && !isStandalone) $install.hidden = false;
+  $install.onclick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      $install.hidden = true;
+    } else {
+      $iosHint.hidden = !$iosHint.hidden;
+    }
+  };
+  addEventListener('appinstalled', () => { $install.hidden = true; });
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+
+  updateHud();
+  renderAch();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
